@@ -20,7 +20,7 @@ export class ReservationService {
   }
 
   // Get a single reservations
-  async getReservations(reservationID): Promise<Reservation> {
+  async getReservationsById(reservationID): Promise<Reservation> {
     const reservation = await this.reservationModel
       .findById(reservationID)
       .exec();

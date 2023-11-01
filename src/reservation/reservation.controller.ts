@@ -28,7 +28,7 @@ export class ReservationController {
     const reservation = await this.reservationService.createReservation(
       createReservationDTO,
     );
-    return res.status(HttpStatus.OK).json({
+    return res.status(HttpStatus.CREATED).json({
       message: 'Reservation has been created successfully',
       reservation,
     });
@@ -42,8 +42,6 @@ export class ReservationController {
     const startDate = new Date(start);
     const endDate = new Date(end);
 
-    console.log({ start, end });
-
     return this.reservationService.searchStaysByDateRange(startDate, endDate);
   }
 
@@ -56,7 +54,7 @@ export class ReservationController {
   // Fetch a particular reservation using ID
   @Get(':id')
   async getReservationById(@Param('id') id) {
-    const reservation = await this.reservationService.getReservations(id);
+    const reservation = await this.reservationService.getReservationsById(id);
 
     if (!reservation) {
       throw new NotFoundException('Reservation does not exist!');

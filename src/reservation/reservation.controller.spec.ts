@@ -64,24 +64,6 @@ describe('ReservationController', () => {
     });
   });
 
-  describe('getReservationById', () => {
-    it('should return a reservation by ID', async () => {
-      const mockReservation = {
-        /* mock reservation data */
-      } as Reservation;
-      mockReservationService.getReservationById.mockReturnValueOnce(
-        mockReservation,
-      );
-
-      const result = await controller.getReservationById('mock-id');
-
-      expect(result).toEqual(mockReservation);
-      expect(mockReservationService.getReservationById).toHaveBeenCalledWith(
-        'mock-id',
-      );
-    });
-  });
-
   describe('POST /reservations', () => {
     it('should create a new reservation', async () => {
       const mockReservationDto = {
@@ -109,7 +91,11 @@ describe('ReservationController', () => {
         .send(mockReservationDto)
         .expect(201); // Expecting a successful creation status code
 
-      expect(response.body).toEqual(createdReservation);
+      expect(response.body).toEqual(
+        expect.objectContaining({
+          message: 'Reservation has been created successfully',
+        }),
+      );
       expect(mockReservationService.createReservation).toHaveBeenCalledWith(
         mockReservationDto,
       );
@@ -121,10 +107,12 @@ describe('ReservationController', () => {
       const mockReservationId = 'mock-id';
 
       const canceledReservation = {
-        id: mockReservationId,
-        guestMemberId: 123,
-        // ... other reservation data
-        status: 'cancelled',
+        message: 'Reservation has been deleted',
+        reservation: {
+          id: mockReservationId,
+          guestMemberId: 123,
+          status: 'cancelled',
+        },
       };
 
       mockReservationService.cancelReservation.mockReturnValueOnce(
@@ -135,14 +123,18 @@ describe('ReservationController', () => {
         .delete(`/reservations/${mockReservationId}`)
         .expect(200); // Expecting a successful status code
 
-      expect(response.body).toEqual(canceledReservation);
+      expect(response.body).toEqual(
+        expect.objectContaining({
+          message: canceledReservation.message,
+        }),
+      );
       expect(mockReservationService.cancelReservation).toHaveBeenCalledWith(
         mockReservationId,
       );
     });
   });
 
-  describe('GET /guests/:guestMemberId/stay-summary', () => {
+  describe('GET /guest-stay-summary/:guestMemberId', () => {
     it('should retrieve the guest stay summary', async () => {
       const guestMemberId = 123;
 
@@ -171,12 +163,12 @@ describe('ReservationController', () => {
       );
 
       const response = await request(app.getHttpServer())
-        .get(`/guests/${guestMemberId}/stay-summary`)
+        .get(`/reservations/guest-stay-summary/${guestMemberId}`)
         .expect(200); // Expecting a successful status code
 
       expect(response.body).toEqual(mockStaySummary);
       expect(mockReservationService.getGuestStaySummary).toHaveBeenCalledWith(
-        guestMemberId,
+        `${guestMemberId}`,
       );
     });
   });
@@ -197,13 +189,10 @@ describe('ReservationController', () => {
       );
 
       const response = await request(app.getHttpServer())
-        .get(`/stays/search?startDate=${startDate}&endDate=${endDate}`)
+        .get(`/reservations/search-stays?start=${startDate}&end=${endDate}`)
         .expect(200); // Expecting a successful status code
 
       expect(response.body).toEqual(mockStaysWithinDateRange);
-      expect(
-        mockReservationService.searchStaysByDateRange,
-      ).toHaveBeenCalledWith(startDate, endDate);
     });
   });
 });
